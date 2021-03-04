@@ -6,11 +6,7 @@ use Illuminate\Database\Query\Builder;
 
 class Take extends AbstractCriteria
 {
-    /**
-     * @var int
-     */
-    protected $quantity;
-
+    protected int $quantity;
 
     /**
      * The number of records returned

@@ -22,15 +22,8 @@ use ReflectionClass;
  */
 abstract class ExtendedPostProcessingRepository extends ExtendedRepository implements PostProcessingRepositoryInterface
 {
-    /**
-     * @var string[]
-     */
-    protected $extraHidden = [];
-
-    /**
-     * @var string[]
-     */
-    protected $extraUnhidden = [];
+    protected string|array $extraHidden = [];
+    protected string|array $extraUnhidden = [];
 
     /**
      * The postprocessors to apply to the returned results for the repository
@@ -39,8 +32,6 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      * @var Collection
      */
     protected $postProcessors;
-
-
 
     /**
      * @param App                            $app
@@ -64,15 +55,11 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      * The idea is that on each call, the postprocessors are instantiated,
      * and the parameters (if any) set for them, so any updates on the
      * repository are reflected by the processors.
-     *
-     * @return Collection|PostProcessorInterface[]
      */
-    public function defaultPostProcessors()
+    public function defaultPostProcessors(): Collection|PostProcessorInterface
     {
         return new Collection([
-            ApplyExtraHiddenAndVisibleAttributes::class => function () {
-                return [$this->extraHidden, $this->extraUnhidden];
-            },
+            ApplyExtraHiddenAndVisibleAttributes::class => fn() => [$this->extraHidden, $this->extraUnhidden],
         ]);
     }
 
@@ -82,11 +69,9 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
     // -------------------------------------------------------------------------
 
     /**
-     * Restores prostprocessors to default collection
-     *
-     * @return $this
+     * Restores postprocessors to default collection
      */
-    public function restoreDefaultPostProcessors()
+    public function restoreDefaultPostProcessors(): self
     {
         $this->postProcessors = $this->defaultPostProcessors();
 
@@ -95,12 +80,8 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
 
     /**
      * Pushes a postProcessor to apply to all models retrieved
-     *
-     * @param string             $class
-     * @param array|Closure|null $parameters
-     * @return $this
      */
-    public function pushPostProcessor($class, $parameters = null)
+    public function pushPostProcessor(string $class, array|Closure|null $parameters = null): self
     {
         $this->postProcessors->put($class, $parameters);
 
@@ -109,11 +90,8 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
 
     /**
      * Removes postProcessor
-     *
-     * @param string $class
-     * @return $this
      */
-    public function removePostProcessor($class)
+    public function removePostProcessor(string $class): self
     {
         $this->postProcessors->forget($class);
 
@@ -124,10 +102,10 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      * Runs the result for retrieval calls to the repository
      * through postprocessing.
      *
-     * @param Collection|Model|null $result the result of the query, ready for postprocessing
+     * @param  Collection|Model|null $result the result of the query, ready for postprocessing
      * @return Model|Collection|mixed[]|null
      */
-    public function postProcess($result)
+    public function postProcess(Collection|Model|null $result): Model|Collection|array|null
     {
         // determine whether there is anything to process
         if (    is_null($result)
@@ -142,11 +120,7 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
 
         // for each Model, instantiate and apply the processors
         if (is_a($result, Collection::class)) {
-
-            $result->transform(function ($model) {
-                return $this->applyPostProcessorsToModel($model);
-            });
-
+            $result->transform(fn($model) => $this->applyPostProcessorsToModel($model));
         } elseif (is_a($result, AbstractPaginator::class)) {
             // result is paginate() result
             // do not apply postprocessing for now (how would we even do it?)
@@ -162,11 +136,8 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
 
     /**
      * Applies the currently active postprocessors to a model
-     *
-     * @param Model $model
-     * @return Model
      */
-    protected function applyPostProcessorsToModel(Model $model)
+    protected function applyPostProcessorsToModel(Model $model): Model
     {
         foreach ($this->postProcessors as $processorClass => $parameters) {
 
@@ -186,19 +157,18 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
     }
 
     /**
-     * @param string $processor
-     * @param mixed  $parameters flexible parameter input can be string, array or closure that generates either
+     * Method for making an post processor
+     *
+     * @param  string $processor
+     * @param  mixed  $parameters flexible parameter input can be string, array or closure that generates either
      * @return PostProcessorInterface
      */
-    protected function makePostProcessor($processor, $parameters = null)
+    protected function makePostProcessor(mixed $processor, $parameters = null)
     {
         // no parameters? simple make
         if (is_null($parameters)) {
-
             $parameters = [];
-
         } elseif (is_callable($parameters)) {
-
             $parameters = $parameters();
         }
 
@@ -233,30 +203,24 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      *
      * Note that these count on only the model's 'hidden' array to be set,
      * if a model whitelists with visible, it won't work as expected
-     *
-     * @param  string $attribute name of the attribute to unhide
-     * @return $this
      */
-    public function unhideAttribute($attribute)
+    public function unhideAttribute(string $attribute): self
     {
-        if ( ! in_array($attribute, $this->extraUnhidden)) {
-
+        if (! in_array($attribute, $this->extraUnhidden)) {
             $this->extraUnhidden[] = $attribute;
         }
 
         return $this;
     }
 
+
     /**
-     * @param array|Arrayable $attributes
-     * @return $this
+     * Method for unhiding attributes.
      */
-    public function unhideAttributes($attributes)
+    public function unhideAttributes(array|Arrayable $attributes): self
     {
-        if ( ! empty($attributes)) {
-
+        if (! empty($attributes)) {
             foreach ($attributes as $attribute) {
-
                 $this->unhideAttribute($attribute);
             }
         }
@@ -269,18 +233,12 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      *
      * Note that these count on only the model's 'hidden' array to be set,
      * if a model whitelists with visible, it won't work as expected
-     *
-     * @param  string $attribute name of the attribute to hide
-     * @return $this
      */
-    public function hideAttribute($attribute)
+    public function hideAttribute(string $attribute): self
     {
         if (($key = array_search($attribute, $this->extraUnhidden)) !== false) {
-
             unset($this->extraUnhidden[ $key ]);
-
         } else {
-
             if ( ! in_array($attribute, $this->extraHidden)) {
                 $this->extraHidden[] = $attribute;
             }
@@ -289,16 +247,10 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
         return $this;
     }
 
-    /**
-     * @param array|Arrayable $attributes
-     * @return $this
-     */
-    public function hideAttributes($attributes)
+    public function hideAttributes(array|Arrayable $attributes): self
     {
         if ( ! empty($attributes)) {
-
             foreach ($attributes as $attribute) {
-
                 $this->hideAttribute($attribute);
             }
         }
@@ -322,11 +274,8 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
 
     /**
      * Override
-     *
-     * @param array $columns
-     * @return Model|null
      */
-    public function first($columns = ['*'])
+    public function first(array|null|string $columns = ['*']): ?Model
     {
         return $this->postProcess( parent::first($columns) );
     }
@@ -334,45 +283,34 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
     /**
      * Override
      *
-     * @param array $columns
-     * @return Model
      * @throws ModelNotFoundException
      */
-    public function firstOrFail($columns = ['*'])
+    public function firstOrFail(array $columns = ['*']): Model
     {
         return $this->postProcess( parent::firstOrFail($columns) );
     }
 
     /**
      * Override
-     *
-     * @param  array $columns
-     * @return mixed
      */
-    public function all($columns = ['*'])
+    public function all(array|string $columns = ['*']): \Illuminate\Database\Eloquent\Collection
     {
         return $this->postProcess( parent::all($columns) );
     }
 
+
     /**
-     * @param  int    $perPage
-     * @param  array  $columns
-     * @param  string $pageName
-     * @param  null   $page
-     * @return LengthAwarePaginator|null
+     * {@inheritdoc}
      */
-    public function paginate($perPage = 1, $columns = ['*'], $pageName = 'page', $page = null)
+    public function paginate(?int $perPage = 1, array $columns = ['*'], string $pageName = 'page', ?int $page = null): LengthAwarePaginator
     {
         return $this->postProcess( parent::paginate($perPage, $columns, $pageName, $page) );
     }
 
     /**
-     * @param  mixed       $id
-     * @param  array       $columns
-     * @param  string|null $attribute
-     * @return Model|null
+     * {@inheritdoc}
      */
-    public function find($id, $columns = ['*'], $attribute = null)
+    public function find(mixed $id, array $columns = ['*'], ?string $attribute = null): ?Model
     {
         return $this->postProcess( parent::find($id, $columns, $attribute) );
     }
@@ -380,50 +318,33 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
     /**
      * Override
      *
-     * @param int|string $id
-     * @param array      $columns
-     * @return Model
      * @throws ModelNotFoundException
      */
-    public function findOrFail($id, $columns = ['*'])
+    public function findOrFail(int|string $id, array $columns = ['*']): Model
     {
         return $this->postProcess( parent::findOrFail($id, $columns) );
     }
 
     /**
      * Override
-     *
-     * @param string $attribute
-     * @param mixed  $value
-     * @param array  $columns
-     * @return Model|Null
      */
-    public function findBy($attribute, $value, $columns = ['*'])
+    public function findBy(string $attribute, mixed $value, array $columns = ['*']): ?Model
     {
         return $this->postProcess( parent::findBy($attribute, $value, $columns) );
     }
+
     /**
      * Override
-     *
-     * @param string $attribute
-     * @param mixed  $value
-     * @param array  $columns
-     * @return mixed
      */
-    public function findAllBy($attribute, $value, $columns = ['*'])
+    public function findAllBy(string $attribute, mixed $value, array $columns = ['*']): mixed
     {
         return $this->postProcess( parent::findAllBy($attribute, $value, $columns) );
     }
+
     /**
      * Override
-     *
-     * @param array $where
-     * @param array $columns
-     * @param bool  $or
-     *
-     * @return \Illuminate\Database\Eloquent\Collection|null
      */
-    public function findWhere($where, $columns = ['*'], $or = false)
+    public function findWhere(array|Arrayable $where, array $columns = ['*'], bool $or = false): ?Collection
     {
         return $this->postProcess( parent::findWhere($where, $columns, $or) );
     }
@@ -433,12 +354,11 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      * Applies callback to query for easier elaborate custom queries
      * on all() calls.
      *
-     * @param Closure $callback must return query/builder compatible
-     * @param array   $columns
-     * @return Collection
+     * The callback must be query/builder compatible.
+     *
      * @throws InvalidArgumentException
      */
-    public function allCallback(Closure $callback, $columns = ['*'])
+    public function allCallback(Closure $callback, array $columns = ['*']): Collection
     {
         return $this->postProcess( parent::allCallback($callback, $columns) );
     }
@@ -447,12 +367,11 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
      * Applies callback to query for easier elaborate custom queries
      * on find (actually: ->first()) calls.
      *
-     * @param Closure $callback must return query/builder compatible
-     * @param array   $columns
-     * @return Collection
+     * The callback must be query/builder compatible.
+     *
      * @throws InvalidArgumentException
      */
-    public function findCallback(Closure $callback, $columns = ['*'])
+    public function findCallback(Closure $callback, array $columns = ['*']): Collection
     {
         return $this->postProcess( parent::findCallback($callback, $columns) );
     }

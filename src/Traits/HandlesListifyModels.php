@@ -2,21 +2,19 @@
 namespace Czim\Repository\Traits;
 
 use Czim\Listify\Contracts\ListifyInterface;
+use Illuminate\Database\Eloquent\Model;
 
-trait HandlesListifyModelsTrait
+trait HandlesListifyModels
 {
     /**
      * Updates the position for a record using Listify
-     *
-     * @param  int $id
-     * @param  int $newPosition     default: top spot
-     * @return boolean
+     * The new position is by default the top spot.
      */
-    public function updatePosition($id, $newPosition = 1)
+    public function updatePosition(int $id, int $newPosition = 1): bool|Model
     {
         $model = $this->makeModel(false);
 
-        if ( ! ($model = $model->find($id))) {
+        if (! ($model = $model->find($id))) {
             return false;
         }
 
@@ -30,16 +28,14 @@ trait HandlesListifyModelsTrait
 
     /**
      * Checks whether the given model has the Listify trait
-     *
-     * @param $model
      */
-    protected function checkModelHasListify($model)
+    protected function checkModelHasListify(Model $model): void
     {
         // should be done with a real interface, but since that is not provided
         // with Listify by default, check only for the methods used here
         // ( ! is_a($model, ListifyInterface::class))
 
-        if ( ! method_exists($model, 'setListPosition')) {
+        if (! method_exists($model, 'setListPosition')) {
             throw new \InvalidArgumentException('Method can only be used on Models with the Listify trait');
         }
     }

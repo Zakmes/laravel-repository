@@ -46,10 +46,6 @@ class MakeRepositoryCommand extends GeneratorCommand
      */
     protected $type = 'Repository';
 
-
-    /**
-     * @param Filesystem $fileSystem
-     */
     public function __construct(Filesystem $fileSystem)
     {
         $this->loadConfig();

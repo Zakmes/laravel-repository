@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Czim\Repository\Contracts;
 
@@ -19,77 +19,55 @@ interface PostProcessingRepositoryInterface
      * The idea is that on each call, the postprocessors are instantiated,
      * and the parameters (if any) set for them, so any updates on the
      * repository are reflected by the processors.
-     *
-     * @return Collection|PostProcessorInterface[]
      */
-    public function defaultPostProcessors();
+    public function defaultPostProcessors(): Collection|PostProcessorInterface;
 
     /**
-     * Restores prostprocessors to default collection
-     *
-     * @return $this
+     * Restores postprocessors to default collection
      */
-    public function restoreDefaultPostProcessors();
+    public function restoreDefaultPostProcessors(): self;
 
     /**
      * Pushes a postProcessor to apply to all models retrieved
-     *
-     * @param string             $class
-     * @param array|Closure|null $parameters
-     * @return $this
      */
-    public function pushPostProcessor($class, $parameters = null);
+    public function pushPostProcessor(string $class, array|Closure|null $parameters = null): self;
 
     /**
      * Removes postProcessor
-     *
-     * @param string $class
-     * @return $this
      */
-    public function removePostProcessor($class);
+    public function removePostProcessor(string $class): self;
 
     /**
      * Runs the result for retrieval calls to the repository
      * through postprocessing.
-     *
-     * @param Collection|Model|null $result the result of the query, ready for postprocessing
-     * @return Model|Collection|mixed[]|null
      */
-    public function postProcess($result);
+    public function postProcess(Collection|Model|null $result): Model|Collection|array|null;
 
     /**
      * Unhide an otherwise hidden attribute (in $hidden array)
      *
      * Note that these count on only the model's 'hidden' array to be set,
      * if a model whitelists with visible, it won't work as expected
-     *
-     * @param  string $attribute name of the attribute to unhide
-     * @return $this
      */
-    public function unhideAttribute($attribute);
+    public function unhideAttribute(string $attribute): self;
 
     /**
-     * @param array|Arrayable $attributes
-     * @return $this
+     * Method for unhiding attributes.
      */
-    public function unhideAttributes($attributes);
+    public function unhideAttributes(array|Arrayable $attributes): self;
 
     /**
      * Hide an otherwise visible attribute (in $hidden array)
      *
      * Note that these count on only the model's 'hidden' array to be set,
      * if a model whitelists with visible, it won't work as expected
-     *
-     * @param  string $attribute name of the attribute to hide
-     * @return $this
      */
-    public function hideAttribute($attribute);
+    public function hideAttribute(string $attribute): self;
 
     /**
-     * @param array|Arrayable $attributes
-     * @return $this
+     * Method for hiding attributes.
      */
-    public function hideAttributes($attributes);
+    public function hideAttributes(array|Arrayable $attributes): self;
 
     /**
      * Resets any hidden or unhidden attribute changes

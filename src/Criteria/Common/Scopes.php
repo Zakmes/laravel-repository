@@ -9,15 +9,12 @@ use Illuminate\Support\Arr;
  */
 class Scopes extends AbstractCriteria
 {
-
     /**
      * Should take the following format:
-     *  [
-     *      [ scope, parameters[] ]
-     *  ]
-     * @var array
+     *
+     * [[ scope, parameters[] ]]
      */
-    protected $scopes;
+    protected array $scopes;
 
 
     /**
@@ -76,10 +73,9 @@ class Scopes extends AbstractCriteria
      * @param $model
      * @return mixed
      */
-    protected function applyToQuery($model)
+    protected function applyToQuery($model): mixed
     {
         foreach ($this->scopes as $scopeSet) {
-
             $model = call_user_func_array([ $model, $scopeSet[0] ], $scopeSet[1]);
         }
 

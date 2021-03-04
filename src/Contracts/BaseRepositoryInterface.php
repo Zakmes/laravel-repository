@@ -4,7 +4,10 @@ namespace Czim\Repository\Contracts;
 
 use Closure;
 use Czim\Repository\Exceptions\RepositoryException;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
@@ -15,191 +18,139 @@ interface BaseRepositoryInterface
      * Returns specified model class name.
      *
      * Note that this is the only abstract method.
-     *
-     * @return string
      */
-    public function model();
+    public function model(): string;
 
     /**
      * Creates instance of model to start building query for
      *
-     * @param bool $storeModel if true, this becomes a fresh $this->model property
+     * @param  bool $storeModel if true, this becomes a fresh $this->model property
      * @return EloquentBuilder
+     *
      * @throws RepositoryException
      */
-    public function makeModel($storeModel = true);
+    public function makeModel(bool $storeModel = true): EloquentBuilder|Model;
 
     /**
-     * Give unexecuted query for current criteria
-     *
-     * @return EloquentBuilder
+     * Give un executed query for current criteria
      */
-    public function query();
+    public function query(): EloquentBuilder;
 
     /**
      * Does a simple count(*) for the model / scope
-     *
-     * @return int
      */
-    public function count();
+    public function count(): int;
 
     /**
      * Returns first match
-     *
-     * @param array $columns
-     * @return Model|null
      */
-    public function first($columns = ['*']);
+    public function first(?array $columns = ['*']): ?Model;
 
     /**
      * Returns first match or throws exception if not found
      *
-     * @param array $columns
-     * @return Model
      * @throws ModelNotFoundException
      */
-    public function firstOrFail($columns = ['*']);
+    public function firstOrFail(array $columns = ['*']): Model;
 
     /**
-     * @param array $columns
-     * @return mixed
+     * Method for getting all the results in the database table.
      */
-    public function all($columns = ['*']);
+    public function all(array $columns = ['*']): EloquentCollection;
 
     /**
-     * @param  string $value
-     * @param  string $key
-     * @return array
+     * Get an array with the values of a given key.
      */
-    public function pluck($value, $key = null);
+    public function pluck(string $value, ?string $key = null): array;
 
     /**
-     * @param  string $value
-     * @param  string $key
-     * @return array
+     * Get an array with the values of a given key.
+     *
      * @deprecated
      */
-    public function lists($value, $key = null);
+    public function lists(string $value, ?string $key = null): array;
 
     /**
-     * @param int    $perPage
-     * @param array  $columns
-     * @param string $pageName
-     * @param null   $page
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * Paginate the given query.
      */
-    public function paginate($perPage, $columns = ['*'], $pageName = 'page', $page = null);
+    public function paginate(int $perPage, array $columns = ['*'], string $pageName = 'page', int|null $page = null): LengthAwarePaginator;
 
     /**
-     * @param  int|string  $id
-     * @param  array       $columns
-     * @param  string|null $attribute
-     * @return Model|null
+     * Find a model in the collection by key.
      */
-    public function find($id, $columns = ['*'], $attribute = null);
+    public function find(int|string $id, array $columns = ['*'], ?string $attribute = null): ?Model;
 
     /**
      * Returns first match or throws exception if not found
      *
-     * @param  int|string $id
-     * @param  array      $columns
-     * @return Model
      * @throws ModelNotFoundException
      */
-    public function findOrFail($id, $columns = ['*']);
+    public function findOrFail(int|string $id, array $columns = ['*']): Model;
 
     /**
-     * @param string $attribute
-     * @param mixed  $value
-     * @param array  $columns
-     * @return mixed
+     * Find record by the attribute and value combination.
      */
-    public function findBy($attribute, $value, $columns = ['*']);
+    public function findBy(string $attribute, mixed $value, array $columns = ['*']): mixed;
 
     /**
-     * @param string $attribute
-     * @param mixed  $value
-     * @param array  $columns
-     * @return mixed
+     * Find all collection items matched by the attribute and value pair.
      */
-    public function findAllBy($attribute, $value, $columns = ['*']);
+    public function findAllBy(string $attribute, mixed $value, array $columns = ['*']): mixed;
 
     /**
      * Find a collection of models by the given query conditions.
-     *
-     * @param array $where
-     * @param array $columns
-     * @param bool  $or
-     *
-     * @return Collection|null
      */
-    public function findWhere($where, $columns = ['*'], $or = false);
+    public function findWhere(array $where, array $columns = ['*'], bool $or = false): ?Collection;
 
     /**
      * Makes a new model without persisting it
-     *
-     * @param  array $data
-     * @return Model
      */
-    public function make(array $data);
+    public function make(array $data): Model;
 
     /**
      * Creates a model and returns it
-     *
-     * @param array $data
-     * @return Model|null
      */
-    public function create(array $data);
+    public function create(array $data): ?Model;
 
     /**
      * Updates a model by $id
      *
-     * @param array  $data
-     * @param        $id
-     * @param string $attribute
+     * @param  array       $data
+     * @param  mixed       $id
+     * @param  string|null $attribute
      * @return bool  false if could not find model or not succesful in updating
      */
-    public function update(array $data, $id, $attribute = null);
+    public function update(array $data, mixed $id, ?string $attribute = null);
 
     /**
      * Finds and fills a model by id, without persisting changes
-     *
-     * @param  array  $data
-     * @param  mixed  $id
-     * @param  string $attribute
-     * @return Model|false
      */
-    public function fill(array $data, $id, $attribute = null);
+    public function fill(array $data, mixed $id, ?string $attribute = null): null|Model|bool;
 
     /**
      * Deletes a model by $id
-     *
-     * @param $id
-     * @return boolean
      */
-    public function delete($id);
+    public function delete(int|string $id): bool;
 
     /**
      * Applies callback to query for easier elaborate custom queries
      * on all() calls.
      *
-     * @param Closure $callback must return query/builder compatible
-     * @param array   $columns
-     * @return Collection
+     * The callback must be query/builder compatible.
+     *
      * @throws \Exception
      */
-    public function allCallback(Closure $callback, $columns = ['*']);
+    public function allCallback(Closure $callback, array $columns = ['*']): Collection;
 
     /**
      * Applies callback to query for easier elaborate custom queries
      * on find (actually: ->first()) calls.
      *
-     * @param Closure $callback must return query/builder compatible
-     * @param array   $columns
-     * @return Collection
+     * The callback must be query/builder compatible.
+     *
      * @throws \Exception
      */
-    public function findCallback(Closure $callback, $columns = ['*']);
+    public function findCallback(Closure $callback, array $columns = ['*']): Collection|Model;
 
 
     /**
@@ -210,52 +161,39 @@ interface BaseRepositoryInterface
      * Note that this also needs all the parameters to send to the constructor
      * of each (and this CANNOT be solved by using the classname of as key,
      * since the same Criteria may be applied more than once).
-     *
-     * @return Collection;
      */
-    public function defaultCriteria();
+    public function defaultCriteria(): Collection;
 
     /**
      * Builds the default criteria and replaces the criteria stack to apply with
      * the default collection.
-     *
-     * @return $this
      */
-    public function restoreDefaultCriteria();
+    public function restoreDefaultCriteria(): self;
 
     /**
      * Sets criteria to empty collection
-     *
-     * @return $this
      */
-    public function clearCriteria();
+    public function clearCriteria(): self;
 
     /**
      * Sets or unsets ignoreCriteria flag. If it is set, all criteria (even
      * those set to apply once!) will be ignored.
-     *
-     * @param bool $ignore
-     * @return $this
      */
-    public function ignoreCriteria($ignore = true);
+    public function ignoreCriteria(bool $ignore = true): self;
 
     /**
      * Returns a cloned set of all currently set criteria (not including
      * those to be applied once).
-     *
-     * @return Collection
      */
-    public function getCriteria();
+    public function getCriteria(): Collection;
 
     /**
      * Applies Criteria to the model for the upcoming query
      *
      * This takes the default/standard Criteria, then overrides
      * them with whatever is found in the onceCriteria list
-     *
-     * @return $this
      */
-    public function applyCriteria();
+    public function applyCriteria(): self;
 
     /**
      * Pushes Criteria, optionally by identifying key
@@ -269,26 +207,19 @@ interface BaseRepositoryInterface
      *                                        empty for normal automatic numeric key
      * @return $this
      */
-    public function pushCriteria(CriteriaInterface $criteria, $key = null);
+    public function pushCriteria(CriteriaInterface $criteria, ?string $key = null): self;
 
     /**
      * Removes criteria by key, if it exists
-     *
-     * @param string $key
-     * @return $this
      */
-    public function removeCriteria($key);
+    public function removeCriteria(string $key): self;
 
     /**
      * Pushes Criteria, but only for the next call, resets to default afterwards
      * Note that this does NOT work for specific criteria exclusively, it resets
      * to default for ALL Criteria.
-     *
-     * @param CriteriaInterface $criteria
-     * @param string|null       $key
-     * @return $this
      */
-    public function pushCriteriaOnce(CriteriaInterface $criteria, $key = null);
+    public function pushCriteriaOnce(CriteriaInterface $criteria, ?string $key = null): self;
 
     /**
      * Removes Criteria, but only for the next call, resets to default afterwards
@@ -297,9 +228,6 @@ interface BaseRepositoryInterface
      *
      * In effect, this adds a NullCriteria to onceCriteria by key, disabling any criteria
      * by that key in the normal criteria list.
-     *
-     * @param string $key
-     * @return $this
      */
-    public function removeCriteriaOnce($key);
+    public function removeCriteriaOnce(string $key): self;
 }

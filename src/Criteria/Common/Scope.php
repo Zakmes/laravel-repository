@@ -36,8 +36,6 @@ class Scope extends AbstractCriteria
      */
     protected function applyToQuery($model)
     {
-        $model = call_user_func_array([ $model, $this->scope ], $this->parameters);
-
-        return $model;
+        return call_user_func_array([ $model, $this->scope ], $this->parameters);
     }
 }

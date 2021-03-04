@@ -2,6 +2,7 @@
 namespace Czim\Repository\Criteria\Translatable;
 
 use Czim\Repository\Criteria\AbstractCriteria;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 class WhereHasTranslation extends AbstractCriteria
@@ -59,13 +60,8 @@ class WhereHasTranslation extends AbstractCriteria
      */
     protected function applyToQuery($model)
     {
-        return $model->whereHas(
-            'translations',
-            function (EloquentBuilder $query) {
-
-                return $query->where($this->attribute, $this->operator, $this->value)
-                             ->where('locale', $this->locale);
-            }
-        );
+        return $model->whereHas('translations', function (EloquentBuilder $query): Builder {
+            return $query->where($this->attribute, $this->operator, $this->value)->where('locale', $this->locale);
+        });
     }
 }

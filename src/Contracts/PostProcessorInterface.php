@@ -7,9 +7,6 @@ interface PostProcessorInterface
 {
     /**
      * Applies processing to a single model
-     *
-     * @param Model $model
-     * @return Model
      */
-    public function process(Model $model);
+    public function process(Model $model): Model;
 }

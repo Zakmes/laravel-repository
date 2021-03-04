@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
  * intermediate object (i.e. a Repository) to make model manipulation
  * easier to test/mock.
  */
-trait HandlesEloquentSavingTrait
+trait HandlesEloquentSaving
 {
 
     /**

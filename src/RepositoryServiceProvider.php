@@ -24,23 +24,17 @@ class RepositoryServiceProvider extends ServiceProvider
         self::$packagePath = dirname(__DIR__);
 
         $this->publishes(
-            [
-                self::$packagePath . '/config/repository.php' => config_path('repository.php'),
-            ],
+            [self::$packagePath . '/config/repository.php' => config_path('repository.php')],
             'repository'
         );
     }
 
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
-        $this->commands([
-            MakeRepositoryCommand::class,
-        ]);
+        $this->commands([MakeRepositoryCommand::class]);
     }
 
 }

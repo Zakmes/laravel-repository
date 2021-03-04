@@ -27,5 +27,5 @@ interface FindsModelsByTranslationInterface
      * @param bool   $exact     = or LIKE match
      * @return Collection
      */
-    public function findAllByTranslation($attribute, $value, $locale = null, $exact = true);
+    public function findAllByTranslation(string $attribute, $value, $locale = null, $exact = true);
 }
