@@ -17,6 +17,11 @@
             "email": "coen@pxlwidgets.com",
             "homepage": "http://www.pixelindustries.com",
             "role": "Developer"
+        },
+        {
+            "name": "Tim Joosten",
+            "email": "Topairy@gmail.com",
+            "role": "Maintainer"
         }
     ],
     "require": {
