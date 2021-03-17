@@ -6,10 +6,10 @@ use Czim\Repository\ExtendedPostProcessingRepository;
 class TestExtendedPostProcessingRepository extends ExtendedPostProcessingRepository
 {
     // model needs an active check by default
-    protected $hasActive = true;
+    protected bool $hasActive = true;
 
     // test assumes cache is enabled by default
-    protected $enableCache = true;
+    protected bool $enableCache = true;
 
 
     public function model()
