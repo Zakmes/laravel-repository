@@ -7,6 +7,7 @@ use Czim\Repository\Contracts\CriteriaInterface;
 use Czim\Repository\Criteria\NullCriteria;
 use Czim\Repository\Exceptions\RepositoryException;
 use Closure;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -93,9 +94,8 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * Creates instance of model to start building query for
      *
      * @param  bool $storeModel  if true, this becomes a fresh $this->model property
-     * @return Model
      *
-     * @throws RepositoryException
+     * @throws RepositoryException|BindingResolutionException
      */
     public function makeModel(bool $storeModel = true): EloquentBuilder|Model
     {
@@ -119,6 +119,8 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     /**
      * Give un executed query for current criteria
+     *
+     * @throws RepositoryException
      */
     public function query(): EloquentBuilder
     {

@@ -1,4 +1,5 @@
-<?php
+<?php declare(strict_types=1);
+
 namespace Czim\Repository\Traits;
 
 use Illuminate\Database\Eloquent\Model;
@@ -10,15 +11,10 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait HandlesEloquentSaving
 {
-
     /**
      * Executes a save on the model provided
-     *
-     * @param  Model $model
-     * @param  array $options
-     * @return bool
      */
-    public function save(Model $model, array $options = array())
+    public function save(Model $model, array $options = []): bool
     {
         return $model->save($options);
     }

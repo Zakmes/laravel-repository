@@ -10,7 +10,7 @@ trait HandlesListifyModels
      * Updates the position for a record using Listify
      * The new position is by default the top spot.
      */
-    public function updatePosition(int $id, int $newPosition = 1): bool|Model
+    public function updatePosition(int $id, int $newPosition = 1): bool | Model
     {
         $model = $this->makeModel(false);
 
@@ -20,7 +20,6 @@ trait HandlesListifyModels
 
         $this->checkModelHasListify($model);
 
-        /** @var ListifyInterface $model */
         $model->setListPosition( (int) $newPosition );
 
         return $model;

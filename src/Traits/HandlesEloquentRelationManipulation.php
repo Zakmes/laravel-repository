@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Czim\Repository\Traits;
 
@@ -40,7 +42,7 @@ trait HandlesEloquentRelationManipulation
     /**
      * Executes an associate on the model model provided
      */
-    public function associate(Model $model, string $relation, Model|int|string $with): bool
+    public function associate(Model $model, string $relation, Model | int | string $with): bool
     {
         return $model->{$relation}()->associate($with);
     }
