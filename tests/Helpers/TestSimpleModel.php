@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Czim\Repository\Test\Helpers;
 
 use Illuminate\Database\Eloquent\Model;

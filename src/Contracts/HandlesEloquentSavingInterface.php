@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Czim\Repository\Contracts;
+
 use Illuminate\Database\Eloquent\Model;
 
 
