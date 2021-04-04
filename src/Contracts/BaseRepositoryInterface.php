@@ -9,6 +9,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
@@ -199,6 +200,10 @@ interface BaseRepositoryInterface
      *
      * @param  array $data
      * @return Model
+     *
+     * @throws MassAssignmentException
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function make(array $data): Model;
 
@@ -207,6 +212,9 @@ interface BaseRepositoryInterface
      *
      * @param  array $data
      * @return Model|null
+     *
+     * @throws BindingResolutionException
+     * @throws RepositoryException
      */
     public function create(array $data): ?Model;
 

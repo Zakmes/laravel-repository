@@ -18,6 +18,7 @@ use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Container\Container as App;
 use InvalidArgumentException;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * Basic repository for retrieving and manipulating Eloquent models.
@@ -263,22 +264,13 @@ abstract class BaseRepository implements BaseRepositoryInterface
     //      Manipulation methods
     // -------------------------------------------------------------------------
 
-    /**
-     * Makes a new model without persisting it
-     *
-     * @throws \Illuminate\Database\Eloquent\MassAssignmentException
-     * @throws RepositoryException
-     */
+    /** {@inheritdoc} */
     public function make(array $data): Model
     {
         return $this->makeModel(false)->fill($data);
     }
 
-    /**
-     * Creates a model and returns it
-     *
-     * @throws RepositoryException
-     */
+    /** {@inheritdoc} */
     public function create(array $data): ?Model
     {
         return $this->makeModel(false)->create($data);
@@ -319,14 +311,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     //      With custom callback
     // -------------------------------------------------------------------------
 
-    /**
-     * Applies callback to query for easier elaborate custom queries
-     * on all() calls.
-     *
-     * The callback mist be compatible with an query/builder entity
-     *
-     * @throws \Exception
-     */
+    /** {@inheritdoc} */
     public function allCallback(Closure $callback, array $columns = ['*']): Collection
     {
         /** @var EloquentBuilder $result */
@@ -337,14 +322,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $result->get($columns);
     }
 
-    /**
-     * Applies callback to query for easier elaborate custom queries
-     * on find (actually: ->first()) calls.
-     *
-     * The callback mist be compatible with an query/builder entity
-     *
-     * @throws \Exception
-     */
+    /** {@inheritdoc} */
     public function findCallback(Closure $callback, array $columns = ['*']): Collection|Model
     {
         /** @var EloquentBuilder $result */
@@ -493,6 +471,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
                 $this->makeModel();
                 $this->activeCriteria = new Collection();
             }
+
             return $this;
         }
 
@@ -500,15 +479,12 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
         // if the new Criteria are different, clear the model and apply the new Criteria
         $this->makeModel();
-
         $this->markAppliedCriteriaAsActive();
 
 
         // apply the collected criteria to the query
         foreach ($this->getCriteriaToApply() as $criteria) {
-
             if ($criteria instanceof CriteriaInterface) {
-
                 $this->model = $criteria->apply($this->model, $this);
             }
         }
@@ -577,9 +553,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $this;
     }
 
-    /**
-     * Removes criteria by key, if it exists
-     */
+    /** {@inheritdoc} */
     public function removeCriteria(string $key): self
     {
         $this->criteria->forget($key);
