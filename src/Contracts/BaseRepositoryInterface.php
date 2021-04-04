@@ -4,8 +4,8 @@ namespace Czim\Repository\Contracts;
 
 use Closure;
 use Czim\Repository\Exceptions\RepositoryException;
+use Exception;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +18,8 @@ interface BaseRepositoryInterface
      * Returns specified model class name.
      *
      * Note that this is the only abstract method.
+     *
+     * @return string
      */
     public function model(): string;
 
@@ -25,29 +27,39 @@ interface BaseRepositoryInterface
      * Creates instance of model to start building query for
      *
      * @param  bool $storeModel if true, this becomes a fresh $this->model property
-     * @return EloquentBuilder
+     * @return EloquentBuilder|Model
      *
      * @throws RepositoryException
      */
-    public function makeModel(bool $storeModel = true): EloquentBuilder|Model;
+    public function makeModel(bool $storeModel = true): EloquentBuilder | Model;
 
     /**
      * Give un executed query for current criteria
+     *
+     * @return EloquentBuilder
      */
     public function query(): EloquentBuilder;
 
     /**
-     * Does a simple count(*) for the model / scope
+     * Does a simple count(*) for the model/scope
+     *
+     * @return int
      */
     public function count(): int;
 
     /**
      * Returns first match
+     *
+     * @param  array $columns The colums u want to select from your query output
+     * @return Model|null
      */
-    public function first(?array $columns = ['*']): ?Model;
+    public function first(array $columns = ['*']): ?Model;
 
     /**
      * Returns first match or throws exception if not found
+     *
+     * @param  array $columns
+     * @return Model
      *
      * @throws ModelNotFoundException
      */
@@ -55,33 +67,59 @@ interface BaseRepositoryInterface
 
     /**
      * Method for getting all the results in the database table.
+     *
+     * @param  array $columns
+     * @return EloquentCollection
      */
     public function all(array $columns = ['*']): EloquentCollection;
 
     /**
      * Get an array with the values of a given key.
+     *
+     * @param  string      $value
+     * @param  string|null $key
+     * @return array
      */
-    public function pluck(string $value, ?string $key = null): array;
+    public function pluck(string $value, string|null $key = null): array;
 
     /**
      * Get an array with the values of a given key.
      *
      * @deprecated
+     *
+     * @param  string      $value
+     * @param  string|null $key
+     * @return array
      */
     public function lists(string $value, ?string $key = null): array;
 
     /**
      * Paginate the given query.
+     *
+     * @param  int      $perPage
+     * @param  array    $columns
+     * @param  string   $pageName
+     * @param  int|null $page
+     * @return LengthAwarePaginator
      */
     public function paginate(int $perPage, array $columns = ['*'], string $pageName = 'page', int|null $page = null): LengthAwarePaginator;
 
     /**
      * Find a model in the collection by key.
+     *
+     * @param  int|string  $id
+     * @param  array       $columns
+     * @param  string|null $attribute
+     * @return Model|null
      */
     public function find(int|string $id, array $columns = ['*'], ?string $attribute = null): ?Model;
 
     /**
      * Returns first match or throws exception if not found
+     *
+     * @param  int|string $id
+     * @param  array      $columns
+     * @return Model
      *
      * @throws ModelNotFoundException
      */
@@ -89,26 +127,47 @@ interface BaseRepositoryInterface
 
     /**
      * Find record by the attribute and value combination.
+     *
+     * @param  string $attribute
+     * @param  mixed  $value
+     * @param  array  $columns
+     * @return mixed
      */
     public function findBy(string $attribute, mixed $value, array $columns = ['*']): mixed;
 
     /**
      * Find all collection items matched by the attribute and value pair.
+     *
+     * @param  string $attribute
+     * @param  mixed  $value
+     * @param  array  $columns
+     * @return mixed
      */
     public function findAllBy(string $attribute, mixed $value, array $columns = ['*']): mixed;
 
     /**
      * Find a collection of models by the given query conditions.
+     *
+     * @param  array $where
+     * @param  array $columns
+     * @param  bool  $or
+     * @return Collection|null
      */
     public function findWhere(array $where, array $columns = ['*'], bool $or = false): ?Collection;
 
     /**
      * Makes a new model without persisting it
+     *
+     * @param  array $data
+     * @return Model
      */
     public function make(array $data): Model;
 
     /**
      * Creates a model and returns it
+     *
+     * @param  array $data
+     * @return Model|null
      */
     public function create(array $data): ?Model;
 
@@ -120,15 +179,23 @@ interface BaseRepositoryInterface
      * @param  string|null $attribute
      * @return bool  false if could not find model or not succesful in updating
      */
-    public function update(array $data, mixed $id, ?string $attribute = null);
+    public function update(array $data, mixed $id, ?string $attribute = null): bool;
 
     /**
-     * Finds and fills a model by id, without persisting changes
+     * Finds and fills a model by id, without persisting changes?
+     *
+     * @param  array       $data
+     * @param  mixed       $id
+     * @param  string|null $attribute
+     * @return Model|bool|null
      */
     public function fill(array $data, mixed $id, ?string $attribute = null): null|Model|bool;
 
     /**
      * Deletes a model by $id
+     *
+     * @param  string|int $id
+     * @return bool
      */
     public function delete(int|string $id): bool;
 
@@ -138,7 +205,11 @@ interface BaseRepositoryInterface
      *
      * The callback must be query/builder compatible.
      *
-     * @throws \Exception
+     * @param  Closure $callback
+     * @param  array   $columns
+     * @return Collection
+     *
+     * @throws Exception
      */
     public function allCallback(Closure $callback, array $columns = ['*']): Collection;
 
@@ -148,7 +219,11 @@ interface BaseRepositoryInterface
      *
      * The callback must be query/builder compatible.
      *
-     * @throws \Exception
+     * @param  Closure $callback
+     * @param  array   $columns
+     * @return Collection|Model
+     *
+     * @throws Exception
      */
     public function findCallback(Closure $callback, array $columns = ['*']): Collection|Model;
 
@@ -167,23 +242,32 @@ interface BaseRepositoryInterface
     /**
      * Builds the default criteria and replaces the criteria stack to apply with
      * the default collection.
+     *
+     * @return self
      */
     public function restoreDefaultCriteria(): self;
 
     /**
      * Sets criteria to empty collection
+     *
+     * @return self
      */
     public function clearCriteria(): self;
 
     /**
      * Sets or unsets ignoreCriteria flag. If it is set, all criteria (even
      * those set to apply once!) will be ignored.
+     *
+     * @param  bool $ignore =
+     * @return self
      */
     public function ignoreCriteria(bool $ignore = true): self;
 
     /**
      * Returns a cloned set of all currently set criteria (not including
      * those to be applied once).
+     *
+     * @return Collection
      */
     public function getCriteria(): Collection;
 
@@ -192,6 +276,8 @@ interface BaseRepositoryInterface
      *
      * This takes the default/standard Criteria, then overrides
      * them with whatever is found in the onceCriteria list
+     *
+     * @return self
      */
     public function applyCriteria(): self;
 
@@ -211,6 +297,9 @@ interface BaseRepositoryInterface
 
     /**
      * Removes criteria by key, if it exists
+     *
+     * @param  string $key
+     * @return self
      */
     public function removeCriteria(string $key): self;
 
@@ -218,6 +307,10 @@ interface BaseRepositoryInterface
      * Pushes Criteria, but only for the next call, resets to default afterwards
      * Note that this does NOT work for specific criteria exclusively, it resets
      * to default for ALL Criteria.
+     *
+     * @param  CriteriaInterface    $criteria
+     * @param  string|null          $key
+     * @return self
      */
     public function pushCriteriaOnce(CriteriaInterface $criteria, ?string $key = null): self;
 
@@ -228,6 +321,9 @@ interface BaseRepositoryInterface
      *
      * In effect, this adds a NullCriteria to onceCriteria by key, disabling any criteria
      * by that key in the normal criteria list.
+     *
+     * @param  string $key
+     * @return self
      */
     public function removeCriteriaOnce(string $key): self;
 }
