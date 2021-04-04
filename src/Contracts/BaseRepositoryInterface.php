@@ -162,7 +162,7 @@ interface BaseRepositoryInterface
      * @param  string $attribute
      * @param  mixed  $value
      * @param  array  $columns
-     * @return mixed
+     * @return EloquentBuilder|Model|null
      *
      * @throws RepositoryException
      * @throws BindingResolutionException
@@ -228,6 +228,9 @@ interface BaseRepositoryInterface
      * @param  mixed       $id
      * @param  string|null $attribute
      * @return bool
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function update(array $data, mixed $id, ?string $attribute = null): bool;
 

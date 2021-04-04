@@ -18,7 +18,6 @@ use Illuminate\Database\Query\Builder as DatabaseBuilder;
 use Illuminate\Support\Collection;
 use Illuminate\Container\Container as App;
 use InvalidArgumentException;
-use JetBrains\PhpStorm\Pure;
 
 /**
  * Basic repository for retrieving and manipulating Eloquent models.
@@ -336,7 +335,8 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Check if the returned custom callback is valid.
      *
-     * @throws InvalidArgumentException
+     * @param  string|EloquentBuilder|DatabaseBuilder|Model $result
+     * @return void
      */
     protected function checkValidCustomCallback(string|EloquentBuilder|DatabaseBuilder|Model $result): void
     {
@@ -426,12 +426,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
         // overrule them with criteria to be applied once
         if ( ! $this->onceCriteria->isEmpty()) {
-
             foreach ($this->onceCriteria as $onceKey => $onceCriteria) {
-
                 // if there is no key, we can only add the criteria
                 if (is_numeric($onceKey)) {
-
                     $criteriaToApply->push($onceCriteria);
                     continue;
                 }
@@ -561,11 +558,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         return $this;
     }
 
-    /**
-     * Pushes Criteria, but only for the next call, resets to default afterwards
-     * Note that this does NOT work for specific criteria exclusively, it resets
-     * to default for ALL Criteria.
-     */
+    /** {@inheritdoc} */
     public function pushCriteriaOnce(CriteriaInterface $criteria, ?string $key = null): self
     {
         if (is_null($key)) {
