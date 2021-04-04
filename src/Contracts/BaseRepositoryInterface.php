@@ -5,6 +5,7 @@ namespace Czim\Repository\Contracts;
 use Closure;
 use Czim\Repository\Exceptions\RepositoryException;
 use Exception;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -30,6 +31,7 @@ interface BaseRepositoryInterface
      * @return EloquentBuilder|Model
      *
      * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function makeModel(bool $storeModel = true): EloquentBuilder | Model;
 
@@ -37,6 +39,9 @@ interface BaseRepositoryInterface
      * Give un executed query for current criteria
      *
      * @return EloquentBuilder
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function query(): EloquentBuilder;
 
@@ -44,6 +49,9 @@ interface BaseRepositoryInterface
      * Does a simple count(*) for the model/scope
      *
      * @return int
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function count(): int;
 
@@ -52,6 +60,9 @@ interface BaseRepositoryInterface
      *
      * @param  array $columns The colums u want to select from your query output
      * @return Model|null
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function first(array $columns = ['*']): ?Model;
 
@@ -62,6 +73,8 @@ interface BaseRepositoryInterface
      * @return Model
      *
      * @throws ModelNotFoundException
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function firstOrFail(array $columns = ['*']): Model;
 
@@ -70,6 +83,9 @@ interface BaseRepositoryInterface
      *
      * @param  array $columns
      * @return EloquentCollection
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function all(array $columns = ['*']): EloquentCollection;
 
@@ -79,6 +95,9 @@ interface BaseRepositoryInterface
      * @param  string      $value
      * @param  string|null $key
      * @return array
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function pluck(string $value, string|null $key = null): array;
 
@@ -90,6 +109,9 @@ interface BaseRepositoryInterface
      * @param  string      $value
      * @param  string|null $key
      * @return array
+     *
+     * @throws BindingResolutionException
+     * @throws RepositoryException
      */
     public function lists(string $value, ?string $key = null): array;
 
@@ -101,6 +123,9 @@ interface BaseRepositoryInterface
      * @param  string   $pageName
      * @param  int|null $page
      * @return LengthAwarePaginator
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function paginate(int $perPage, array $columns = ['*'], string $pageName = 'page', int|null $page = null): LengthAwarePaginator;
 
@@ -111,6 +136,9 @@ interface BaseRepositoryInterface
      * @param  array       $columns
      * @param  string|null $attribute
      * @return Model|null
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function find(int|string $id, array $columns = ['*'], ?string $attribute = null): ?Model;
 
@@ -122,6 +150,8 @@ interface BaseRepositoryInterface
      * @return Model
      *
      * @throws ModelNotFoundException
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function findOrFail(int|string $id, array $columns = ['*']): Model;
 
@@ -132,8 +162,11 @@ interface BaseRepositoryInterface
      * @param  mixed  $value
      * @param  array  $columns
      * @return mixed
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
-    public function findBy(string $attribute, mixed $value, array $columns = ['*']): mixed;
+    public function findBy(string $attribute, mixed $value, array $columns = ['*']): EloquentBuilder|Model|null;
 
     /**
      * Find all collection items matched by the attribute and value pair.
@@ -142,6 +175,9 @@ interface BaseRepositoryInterface
      * @param  mixed  $value
      * @param  array  $columns
      * @return mixed
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function findAllBy(string $attribute, mixed $value, array $columns = ['*']): mixed;
 
@@ -152,6 +188,9 @@ interface BaseRepositoryInterface
      * @param  array $columns
      * @param  bool  $or
      * @return Collection|null
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function findWhere(array $where, array $columns = ['*'], bool $or = false): ?Collection;
 
@@ -174,10 +213,13 @@ interface BaseRepositoryInterface
     /**
      * Updates a model by $id
      *
+     * Returns false when the model couldn't updated or is not found
+     * in the database storage.
+     *
      * @param  array       $data
      * @param  mixed       $id
      * @param  string|null $attribute
-     * @return bool  false if could not find model or not succesful in updating
+     * @return bool
      */
     public function update(array $data, mixed $id, ?string $attribute = null): bool;
 
@@ -188,6 +230,9 @@ interface BaseRepositoryInterface
      * @param  mixed       $id
      * @param  string|null $attribute
      * @return Model|bool|null
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     public function fill(array $data, mixed $id, ?string $attribute = null): null|Model|bool;
 
@@ -196,6 +241,9 @@ interface BaseRepositoryInterface
      *
      * @param  string|int $id
      * @return bool
+     *
+     * @throws BindingResolutionException
+     * @throws RepositoryException
      */
     public function delete(int|string $id): bool;
 
