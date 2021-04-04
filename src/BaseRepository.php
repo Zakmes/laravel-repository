@@ -590,6 +590,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
      * (misc): Returns default per page count.
      *
      * @return int
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
     protected function getDefaultPerPage(): int
     {
