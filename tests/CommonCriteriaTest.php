@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Czim\Repository\Test;
 
 use Czim\Repository\Contracts\BaseRepositoryInterface;
