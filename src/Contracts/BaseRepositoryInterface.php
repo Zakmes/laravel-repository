@@ -70,7 +70,7 @@ interface BaseRepositoryInterface
     /**
      * Returns first match or throws exception if not found
      *
-     * @param  array $columns
+     * @param  array $columns   The columns that u wish to use from the collection.
      * @return Model
      *
      * @throws ModelNotFoundException
@@ -82,7 +82,7 @@ interface BaseRepositoryInterface
     /**
      * Method for getting all the results in the database table.
      *
-     * @param  array $columns
+     * @param  array $columns   The columns that u wish to use from the collection.
      * @return EloquentCollection
      *
      * @throws RepositoryException
@@ -93,8 +93,8 @@ interface BaseRepositoryInterface
     /**
      * Get an array with the values of a given key.
      *
-     * @param  string      $value
-     * @param  string|null $key
+     * @param  string      $value   The value for the array
+     * @param  string|null $key     The key for the array
      * @return array
      *
      * @throws RepositoryException
@@ -107,8 +107,8 @@ interface BaseRepositoryInterface
      *
      * @deprecated
      *
-     * @param  string      $value
-     * @param  string|null $key
+     * @param  string      $value   The value for the array
+     * @param  string|null $key     The key for the array
      * @return array
      *
      * @throws BindingResolutionException
@@ -119,10 +119,10 @@ interface BaseRepositoryInterface
     /**
      * Paginate the given query.
      *
-     * @param  int      $perPage
-     * @param  array    $columns
-     * @param  string   $pageName
-     * @param  int|null $page
+     * @param  int      $perPage    The amount of records per page.
+     * @param  array    $columns    The columns u wish to use from the collection.
+     * @param  string   $pageName   The name for the page parameter in the url
+     * @param  int|null $page       The indicator for tha page where the user is at.
      * @return LengthAwarePaginator
      *
      * @throws RepositoryException
@@ -133,9 +133,9 @@ interface BaseRepositoryInterface
     /**
      * Find a model in the collection by key.
      *
-     * @param  int|string  $id
-     * @param  array       $columns
-     * @param  string|null $attribute
+     * @param  int|string  $id          The identifier for the database record. It will be used in an WHERE clause
+     * @param  array       $columns     The columns that u wish to use from the collection.
+     * @param  string|null $attribute   The database table column that will be used in the WHERE clause
      * @return Model|null
      *
      * @throws RepositoryException
@@ -146,8 +146,8 @@ interface BaseRepositoryInterface
     /**
      * Returns first match or throws exception if not found
      *
-     * @param  int|string $id
-     * @param  array      $columns
+     * @param  int|string $id       The unique identifier from the database record.
+     * @param  array      $columns  The database columns that u wish to use from the collection
      * @return Model
      *
      * @throws ModelNotFoundException
@@ -159,9 +159,9 @@ interface BaseRepositoryInterface
     /**
      * Find record by the attribute and value combination.
      *
-     * @param  string $attribute
-     * @param  mixed  $value
-     * @param  array  $columns
+     * @param  string $attribute    The database table his column name for the WHERE clause
+     * @param  mixed  $value        The value for the where clause
+     * @param  array  $columns      The database columns that u wish to use from the collection.
      * @return EloquentBuilder|Model|null
      *
      * @throws RepositoryException
@@ -172,9 +172,9 @@ interface BaseRepositoryInterface
     /**
      * Find all collection items matched by the attribute and value pair.
      *
-     * @param  string $attribute
-     * @param  mixed  $value
-     * @param  array  $columns
+     * @param  string $attribute    The database table his column name for the WHERE clause
+     * @param  mixed  $value        The value for the where clause
+     * @param  array  $columns      The database columns that u wish to use from the collection.
      * @return mixed
      *
      * @throws RepositoryException
@@ -185,9 +185,9 @@ interface BaseRepositoryInterface
     /**
      * Find a collection of models by the given query conditions.
      *
-     * @param  array $where
-     * @param  array $columns
-     * @param  bool  $or
+     * @param  array $where     The data array for the where clauses.
+     * @param  array $columns   The database columns that u wish to use from the query result.
+     * @param  bool  $or        Configuration flag for determining is OR WHERE clauses will be used or not.
      * @return Collection|null
      *
      * @throws RepositoryException
@@ -198,7 +198,7 @@ interface BaseRepositoryInterface
     /**
      * Makes a new model without persisting it
      *
-     * @param  array $data
+     * @param  array $data  The data for the database record that u want to create.
      * @return Model
      *
      * @throws MassAssignmentException
@@ -210,7 +210,7 @@ interface BaseRepositoryInterface
     /**
      * Creates a model and returns it
      *
-     * @param  array $data
+     * @param  array $data  The data that u want to store in the database table.
      * @return Model|null
      *
      * @throws BindingResolutionException
@@ -224,9 +224,9 @@ interface BaseRepositoryInterface
      * Returns false when the model couldn't updated or is not found
      * in the database storage.
      *
-     * @param  array       $data
-     * @param  mixed       $id
-     * @param  string|null $attribute
+     * @param  array       $data      The new data for the database record.
+     * @param  mixed       $id        The identifier for the where clause
+     * @param  string|null $attribute The database column name for the where clause.
      * @return bool
      *
      * @throws RepositoryException
@@ -237,9 +237,9 @@ interface BaseRepositoryInterface
     /**
      * Finds and fills a model by id, without persisting changes?
      *
-     * @param  array       $data
-     * @param  mixed       $id
-     * @param  string|null $attribute
+     * @param  array       $data      The data which will be used to fill the database record.
+     * @param  mixed       $id        The identifier for the where clause.
+     * @param  string|null $attribute The database column name for the where cause
      * @return Model|bool|null
      *
      * @throws RepositoryException
@@ -250,7 +250,7 @@ interface BaseRepositoryInterface
     /**
      * Deletes a model by $id
      *
-     * @param  string|int $id
+     * @param  string|int $id The unique identifier from the resource that u want to delete.
      * @return bool
      *
      * @throws BindingResolutionException
@@ -264,8 +264,8 @@ interface BaseRepositoryInterface
      *
      * The callback must be query/builder compatible.
      *
-     * @param  Closure $callback
-     * @param  array   $columns
+     * @param  Closure $callback    The closure that acts as an callback in the repository.
+     * @param  array   $columns     The columns u want to use from the database table.
      * @return Collection
      *
      * @throws Exception
@@ -278,8 +278,8 @@ interface BaseRepositoryInterface
      *
      * The callback must be query/builder compatible.
      *
-     * @param  Closure $callback
-     * @param  array   $columns
+     * @param  Closure $callback    The closure that acts as an callback in the repository.
+     * @param  array   $columns     The columns u want to use from the database table.
      * @return Collection|Model
      *
      * @throws Exception
@@ -317,7 +317,7 @@ interface BaseRepositoryInterface
      * Sets or unsets ignoreCriteria flag. If it is set, all criteria (even
      * those set to apply once!) will be ignored.
      *
-     * @param  bool $ignore =
+     * @param  bool $ignore The status flag for configuring if u want to ignore the criteria.
      * @return self
      */
     public function ignoreCriteria(bool $ignore = true): self;
@@ -346,7 +346,7 @@ interface BaseRepositoryInterface
      *
      * Note that this does NOT overrule any onceCriteria, even if set by key!
      *
-     * @param CriteriaInterface $criteria
+     * @param CriteriaInterface $criteria     The criteria interface that u want to push once.
      * @param string|null       $key          unique identifier to store criteria as
      *                                        this may be used to remove and overwrite criteria
      *                                        empty for normal automatic numeric key
@@ -357,7 +357,7 @@ interface BaseRepositoryInterface
     /**
      * Removes criteria by key, if it exists
      *
-     * @param  string $key
+     * @param  string $key The unique key of the criteria that you want to remove.
      * @return self
      */
     public function removeCriteria(string $key): self;
@@ -367,8 +367,8 @@ interface BaseRepositoryInterface
      * Note that this does NOT work for specific criteria exclusively, it resets
      * to default for ALL Criteria.
      *
-     * @param  CriteriaInterface    $criteria
-     * @param  string|null          $key
+     * @param  CriteriaInterface    $criteria The criteria interface that u want to push only once.
+     * @param  string|null          $key      The unique key of the criteria.
      * @return self
      */
     public function pushCriteriaOnce(CriteriaInterface $criteria, ?string $key = null): self;
@@ -381,7 +381,7 @@ interface BaseRepositoryInterface
      * In effect, this adds a NullCriteria to onceCriteria by key, disabling any criteria
      * by that key in the normal criteria list.
      *
-     * @param  string $key
+     * @param  string $key The unique key of the criteria that u want to remove once.
      * @return self
      */
     public function removeCriteriaOnce(string $key): self;
