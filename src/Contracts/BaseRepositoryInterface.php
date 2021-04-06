@@ -189,13 +189,13 @@ interface BaseRepositoryInterface
      *
      * @param  array $where     The data array for the where clauses.
      * @param  array $columns   The database columns that u wish to use from the query result.
-     * @param  bool  $or        Configuration flag for determining is OR WHERE clauses will be used or not.
+     * @param  bool  $orWhere   Configuration flag for determining is OR WHERE clauses will be used or not.
      * @return Collection|null
      *
      * @throws RepositoryException
      * @throws BindingResolutionException
      */
-    public function findWhere(array $where, array $columns = ['*'], bool $or = false): ?Collection;
+    public function findWhere(array $where, array $columns = ['*'], bool $orWhere = false): ?Collection;
 
     /**
      * Makes a new model without persisting it
@@ -253,12 +253,12 @@ interface BaseRepositoryInterface
      * Deletes a model by $id
      *
      * @param  string|int $id The unique identifier from the resource that u want to delete.
-     * @return bool
+     * @return int
      *
      * @throws BindingResolutionException
      * @throws RepositoryException
      */
-    public function delete(int|string $id): bool;
+    public function delete(int|string $id): int;
 
     /**
      * Applies callback to query for easier elaborate custom queries

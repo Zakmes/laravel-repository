@@ -89,7 +89,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
 
     /** {@inheritdoc} */
-    public abstract function model(): string;
+    abstract public function model(): string;
 
     /** {@inheritdoc} */
     public function makeModel(bool $storeModel = true): EloquentBuilder|Model
@@ -118,7 +118,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
         $this->applyCriteria();
 
         if ($this->model instanceof Model) {
-            return $this->model->query();
+            return $this->model::query();
         }
 
         return clone $this->model;
@@ -187,7 +187,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     {
         $query = $this->query();
 
-        if (null !== $attribute && $attribute !== $query->getModel()->getKeyName()) {
+        if ($attribute !== null && $attribute !== $query->getModel()->getKeyName()) {
             return $query->where($attribute, $id)->first($columns);
         }
 
@@ -219,7 +219,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     }
 
     /** {@inheritdoc} */
-    public function findWhere(array|Arrayable $where, array $columns = ['*'], bool $or = false): ?Collection
+    public function findWhere(array|Arrayable $where, array $columns = ['*'], bool $orWhere = false): ?Collection
     {
         $model = $this->query();
 
@@ -227,31 +227,29 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
             if ($value instanceof Closure) {
 
-                $model = ( ! $or)
+                $model = ( ! $orWhere)
                     ? $model->where($value)
                     : $model->orWhere($value);
 
             } elseif (is_array($value)) {
 
                 if (count($value) === 3) {
+                    [$field, $operator, $search] = $value;
 
-                    list($field, $operator, $search) = $value;
-
-                    $model = ( ! $or)
+                    $model = ( ! $orWhere)
                         ? $model->where($field, $operator, $search)
                         : $model->orWhere($field, $operator, $search);
 
                 } elseif (count($value) === 2) {
+                    [$field, $search] = $value;
 
-                    list($field, $search) = $value;
-
-                    $model = ! $or
+                    $model = ! $orWhere
                         ? $model->where($field, $search)
                         : $model->orWhere($field, $search);
                 }
 
             } else {
-                $model = ! $or
+                $model = ! $orWhere
                     ? $model->where($field, $value)
                     : $model->orWhere($field, $value);
             }
@@ -282,7 +280,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     {
         $model = $this->find($id, ['*'], $attribute);
 
-        if (empty($model)) {
+        if ($model === null) {
             return false;
         }
 
@@ -302,15 +300,10 @@ abstract class BaseRepository implements BaseRepositoryInterface
     }
 
     /** {@inheritdoc} */
-    public function delete(mixed $id): bool
+    public function delete(int|string $id): int
     {
         return $this->makeModel(false)->destroy($id);
     }
-
-
-    // -------------------------------------------------------------------------
-    //      With custom callback
-    // -------------------------------------------------------------------------
 
     /** {@inheritdoc} */
     public function allCallback(Closure $callback, array $columns = ['*']): Collection
@@ -346,11 +339,6 @@ abstract class BaseRepository implements BaseRepositoryInterface
             throw new InvalidArgumentException('Incorrect allCustom call in repository. The callback must return a QueryBuilder/EloquentBuilder or Model object.');
         }
     }
-
-
-    // -------------------------------------------------------------------------
-    //      Criteria
-    // -------------------------------------------------------------------------
 
     /**
      * Returns a collection with the default criteria for the repository.
@@ -580,7 +568,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
     public function removeCriteriaOnce(string $key): self
     {
         // if not present in normal list, there is nothing to override
-        if ( ! $this->criteria->has($key)) return $this;
+        if (! $this->criteria->has($key)) {
+            return $this;
+        }
 
         // override by key with Null-value
         $this->onceCriteria->put($key, new NullCriteria);
