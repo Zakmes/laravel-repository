@@ -7,17 +7,24 @@ namespace Czim\Repository;
 use Czim\Repository\Contracts\ExtendedRepositoryInterface;
 use Czim\Repository\Criteria\Common\Scopes;
 use Czim\Repository\Criteria\Common\UseCache;
+use Czim\Repository\Exceptions\RepositoryException;
+use Exception;
 use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Collection;
 use Czim\Repository\Enums\CriteriaKey;
 
 /**
+ * Class ExtendedRepository
+ * ----
  * Extends BaseRepository with extra functionality:
  *
- *      - setting default criteria to apply
- *      - active record filtering
- *      - caching (requires Rememberable or custom caching Criteria)
- *      - scopes
+ * - setting default criteria to apply
+ * - active record filtering
+ * - caching (requires Rememberable or custom caching Criteria)
+ * - scopes
+ *
+ * @package Czim|Repository
  */
 abstract class ExtendedRepository extends BaseRepository implements ExtendedRepositoryInterface
 {
@@ -42,8 +49,7 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     protected bool $includeInactive = false;
 
     /**
-     * Scopes to apply to queries
-     * Must be supported by model used!
+     * Scopes to apply to queries. Must be supported by model used!
      */
     protected array $scopes = [];
 
@@ -53,6 +59,16 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
      */
     protected array $scopeParameters = [];
 
+    /**
+     * ExtendedRepository constructor.
+     *
+     * @param  Container  $app
+     * @param  Collection $collection
+     * @return void
+     *
+     * @throws BindingResolutionException
+     * @throws RepositoryException
+     */
     public function __construct(Container $app, Collection $collection)
     {
         parent::__construct($app, $collection);
@@ -60,16 +76,8 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
         $this->refreshSettingDependentCriteria();
     }
 
-
-    // -------------------------------------------------------------------------
-    //      Criteria
-    // -------------------------------------------------------------------------
-
     /**
-     * Builds the default criteria and replaces the criteria stack to apply with
-     * the default collection.
-     *
-     * Override to also refresh the default criteria for extended functionality.
+     * {@inheritdoc}
      */
     public function restoreDefaultCriteria(): self
     {
@@ -81,9 +89,7 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     }
 
     /**
-     * Refreshes named criteria, so that they reflect the current repository settings
-     * (for instance for updating the Active check, when includeActive has changed)
-     * This also makes sure the named criteria exist at all, if they are required and were never added.
+     * {@inheritdoc}
      */
     public function refreshSettingDependentCriteria(): self
     {
@@ -113,79 +119,78 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     /**
      * Returns Criteria to use for caching. Override to replace with something other
      * than Rememberable (which is used by the default Common\UseCache Criteria);
+     *
+     * @return UseCache
      */
     protected function getCacheCriteriaInstance(): UseCache
     {
-        return new Criteria\Common\UseCache();
+        return new UseCache();
     }
-
 
     /**
      * Returns Criteria to use for applying scopes. Override to replace with something
      * other the default Common\Scopes Criteria.
      *
-     * @throws \Exception
+     * @return Scopes
+     *
+     * @throws Exception
      */
     protected function getScopesCriteriaInstance(): Scopes
     {
         return new Criteria\Common\Scopes( $this->convertScopesToCriteriaArray() );
     }
 
-
-    // -------------------------------------------------------------------------
-    //      Scopes
-    // -------------------------------------------------------------------------
-
     /**
-     * Adds a scope to enforce, overwrites with new parameters if it already exists
+     * {@inheritdoc}
      */
     public function addScope(string $scope, array $parameters = []): self
     {
-        if (! in_array($scope, $this->scopes)) {
-
+        if (! in_array($scope, $this->scopes, true)) {
             $this->scopes[] = $scope;
         }
 
         $this->scopeParameters[ $scope ] = $parameters;
-
         $this->refreshSettingDependentCriteria();
+
         return $this;
     }
 
     /**
-     * Adds a scope to enforce
+     * {@inheritdoc}
      */
     public function removeScope(string $scope): self
     {
-        $this->scopes = array_diff($this->scopes, [ $scope ]);
+        $this->scopes = array_diff($this->scopes, [$scope]);
 
-        unset($this->scopeParameters[ $scope ]);
+        unset($this->scopeParameters[$scope]);
 
         $this->refreshSettingDependentCriteria();
+
         return $this;
     }
 
     /**
-     * Clears any currently set scopes
+     * {@inheritdoc}
      */
     public function clearScopes(): self
     {
-        $this->scopes          = [];
+        $this->scopes = [];
         $this->scopeParameters = [];
-
         $this->refreshSettingDependentCriteria();
+
         return $this;
     }
 
     /**
      * Converts the tracked scopes to an array that the Scopes Common Criteria will eat.
+     *
+     * @return array
      */
     protected function convertScopesToCriteriaArray(): array
     {
         $scopes = [];
 
         foreach ($this->scopes as $scope) {
-
             if (array_key_exists($scope, $this->scopeParameters) && ! empty($this->scopeParameters[ $scope ])) {
                 $scopes[] = [$scope, $this->scopeParameters[$scope]];
                 continue;
@@ -197,14 +202,8 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
         return $scopes;
     }
 
-
-    // -------------------------------------------------------------------------
-    //      Maintenance mode / settings
-    // -------------------------------------------------------------------------
-
     /**
-     * Enables maintenance mode, ignoring standard limitations on model availability
-     * and disables caching (if it was enabled).
+     * {@inheritdoc}
      */
     public function maintenance(bool $enable = true): self
     {
@@ -212,19 +211,18 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     }
 
     /**
-     * Prepares repository to include inactive entries
-     * (entries with the $this->activeColumn set to false)
+     * {@inheritdoc}
      */
     public function includeInactive(bool $enable = true): self
     {
-        $this->includeInactive = (bool) $enable;
+        $this->includeInactive = $enable;
         $this->refreshSettingDependentCriteria();
 
         return $this;
     }
 
     /**
-     * Prepares repository to exclude inactive entries
+     * {@inheritdoc}
      */
     public function excludeInactive(): self
     {
@@ -232,7 +230,7 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     }
 
     /**
-     * Returns whether inactive records are included
+     * {@inheritdoc}
      */
     public function isInactiveIncluded(): bool
     {
@@ -240,18 +238,18 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     }
 
     /**
-     * Enables using the cache for retrieval
+     * {@inheritdoc}
      */
     public function enableCache(bool $enable = true): self
     {
-        $this->enableCache = (bool) $enable;
+        $this->enableCache = $enable;
         $this->refreshSettingDependentCriteria();
 
         return $this;
     }
 
     /**
-     * Disables using the cache for retrieval
+     * {@inheritdoc}
      */
     public function disableCache(): self
     {
@@ -259,22 +257,24 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
     }
 
     /**
-     * Returns whether cache is currently active
+     * {@inheritdoc}
      */
     public function isCacheEnabled(): bool
     {
         return $this->enableCache;
     }
 
-
-    // -------------------------------------------------------------------------
-    //      Manipulation
-    // -------------------------------------------------------------------------
-
     /**
      * Update the active flag for a record
+     *
+     * @param  int|string   $identifier The unique identifier from the database record.
+     * @param  bool         $active     Parameter for setting the record as active or inactive
+     * @return bool
+     *
+     * @throws RepositoryException
+     * @throws BindingResolutionException
      */
-    public function activateRecord(int $id, bool $active = true): bool
+    public function activateRecord(int|string $identifier, bool $active = true): bool
     {
         if (! $this->hasActive) {
             return false;
@@ -282,11 +282,11 @@ abstract class ExtendedRepository extends BaseRepository implements ExtendedRepo
 
         $model = $this->makeModel(false);
 
-        if (! ($model = $model->find($id))) {
+        if (! ($model = $model->find($identifier))) {
             return false;
         }
 
-        $model->{$this->activeColumn} = (bool) $active;
+        $model->{$this->activeColumn} = $active;
 
         return $model->save();
     }

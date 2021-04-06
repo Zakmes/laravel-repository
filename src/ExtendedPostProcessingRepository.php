@@ -111,7 +111,7 @@ abstract class ExtendedPostProcessingRepository extends ExtendedRepository imple
     public function postProcess(Collection|Model|null $result): Model|Collection|array|null
     {
         // determine whether there is anything to process
-        if (is_null($result) || is_a($result, Collection::class) && $result->isEmpty()) {
+        if (is_null($result) || (is_a($result, Collection::class) && $result->isEmpty())) {
             return $result;
         }
 

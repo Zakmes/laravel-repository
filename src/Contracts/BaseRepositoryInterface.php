@@ -16,6 +16,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 
+/**
+ * Interface BaseRepositoryInterface
+ *
+ * @package Czim\Repository\Contracts
+ */
 interface BaseRepositoryInterface
 {
     /**

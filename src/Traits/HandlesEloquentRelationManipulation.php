@@ -7,9 +7,13 @@ namespace Czim\Repository\Traits;
 use Illuminate\Database\Eloquent\Model;
 
 /**
+ * Class HandlesEloquentRelationManipulation
+ *
  * The point of this is to provide Eloquent relations management through
  * some intermediate object (i.e. a Repository) to make model manipulation
  * easier to test/mock.
+ *
+ * @package Czim\Repository\Traits
  */
 trait HandlesEloquentRelationManipulation
 {
